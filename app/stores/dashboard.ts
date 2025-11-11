@@ -1,3 +1,13 @@
+/**
+ * Dashboard Store
+ * 
+ * Pinia store for managing learning dashboard data including topics, projects, and notes.
+ * Supports both local state management and Firestore integration for data persistence.
+ * 
+ * @file stores/dashboard.ts
+ * @version 1.0.0
+ */
+
 import { defineStore } from 'pinia';
 import type { Topic, Project, Note, ProjectStatus } from '~/types';
 import { useNuxtApp } from '#app';
@@ -13,32 +23,69 @@ import {
 	updateDoc,
 } from 'firebase/firestore';
 
+/**
+ * Type guard to validate ProjectStatus values
+ * @param s - Value to check
+ * @returns True if value is a valid ProjectStatus
+ */
 function isValidStatus(s: unknown): s is ProjectStatus {
 	return s === 'in-progress' || s === 'completed' || s === 'not-started';
 }
 
+/**
+ * Store state interface
+ */
 interface State {
+	/** Array of learning topics with their projects */
 	topics: Topic[];
+	/** Index for quick project lookup by project ID */
 	projectIndex: {
 		[projectId: string]: { topicId: string; project: Project };
 	};
+	/** Flag indicating if Firestore is being used for data persistence */
 	usingFirestore: boolean;
 }
 
+/**
+ * Dashboard Store
+ * 
+ * Manages the application's learning data including topics, projects, and notes.
+ * Provides CRUD operations and synchronization with Firestore when available.
+ */
 export const useDashboardStore = defineStore('dashboard', {
+	/**
+	 * Store state initialization
+	 */
 	state: (): State => ({
 		topics: [],
 		projectIndex: {},
 		usingFirestore: false,
 	}),
 
+	/**
+	 * Store actions for data operations
+	 */
 	actions: {
+		/**
+		 * Loads initial data from Firestore or initializes empty state
+		 * 
+		 * This method attempts to connect to Firestore and load topics, projects, and notes.
+		 * If Firestore is unavailable, it falls back to an empty local state.
+		 * 
+		 * @throws {Error} When Firestore connection fails
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.loadInitialData();
+		 */
 		async loadInitialData(): Promise<void> {
+			// Return early if data is already loaded
 			if (this.topics.length) return;
 
 			const nuxtApp = useNuxtApp();
 			const db = (nuxtApp as any).$db;
 
+			// Fallback to local state if Firestore is not available
 			if (!db) {
 				this.topics = [];
 				this.reindexProjects();
@@ -50,6 +97,7 @@ export const useDashboardStore = defineStore('dashboard', {
 				const topicsCol = collection(db, 'topics');
 				const topicsSnap = await getDocs(topicsCol);
 
+				// Initialize empty state if no data exists in Firestore
 				if (topicsSnap.empty) {
 					this.topics = [];
 					this.reindexProjects();
@@ -59,11 +107,13 @@ export const useDashboardStore = defineStore('dashboard', {
 
 				const loadedTopics: Topic[] = [];
 
+				// Load each topic and its nested projects and notes
 				for (const tDoc of topicsSnap.docs) {
 					const topicId = tDoc.id;
 					const topicData = tDoc.data() as any;
 					const name = topicData?.name ?? topicId;
 
+					// Load projects for this topic, ordered by start date
 					const projectsCol = collection(
 						db,
 						'topics',
@@ -76,10 +126,12 @@ export const useDashboardStore = defineStore('dashboard', {
 
 					const projects: Project[] = [];
 
+					// Process each project and its notes
 					for (const pDoc of projectsSnap.docs) {
 						const p = pDoc.data() as any;
 						const projectId = pDoc.id;
 
+						// Load notes for this project, ordered by date
 						const notesCol = collection(
 							db,
 							'topics',
@@ -99,6 +151,7 @@ export const useDashboardStore = defineStore('dashboard', {
 							} as Note;
 						});
 
+						// Validate and set project status
 						const status: ProjectStatus = isValidStatus(p.status)
 							? p.status
 							: 'not-started';
@@ -138,6 +191,14 @@ export const useDashboardStore = defineStore('dashboard', {
 			}
 		},
 
+		/**
+		 * Rebuilds the project index for efficient project lookup
+		 * 
+		 * This method creates a flat index of all projects keyed by project ID
+		 * for quick access without traversing the nested topic structure.
+		 * 
+		 * @returns {void}
+		 */
 		reindexProjects(): void {
 			this.projectIndex = {};
 			for (const topic of this.topics) {
@@ -150,6 +211,18 @@ export const useDashboardStore = defineStore('dashboard', {
 			}
 		},
 
+		/**
+		 * Seeds Firestore with initial data
+		 * 
+		 * Used for initial database population with sample or default data.
+		 * 
+		 * @param db - Firestore database instance
+		 * @param topics - Array of topics to seed
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.seedFirestore(db, sampleTopics);
+		 */
 		async seedFirestore(db: any, topics: Topic[]): Promise<void> {
 			for (const t of topics) {
 				const tDocRef = doc(db, 'topics', t.id);
@@ -178,33 +251,59 @@ export const useDashboardStore = defineStore('dashboard', {
 			}
 		},
 
+		/**
+		 * Updates a topic with new data
+		 * 
+		 * @param topicId - ID of the topic to update
+		 * @param updatedData - Partial topic data to update
+		 * @throws {Error} When topic is not found
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.updateTopic('math', { name: 'Mathematics' });
+		 */
 		async updateTopic(topicId: string, updatedData: Partial<Topic>): Promise<void> {
-	const nuxtApp = useNuxtApp();
-	const db = (nuxtApp as any).$db;
+			const nuxtApp = useNuxtApp();
+			const db = (nuxtApp as any).$db;
 
-	try {
-		const topic = this.topics.find((t) => t.id === topicId);
-		if (!topic) throw new Error('Topic not found');
+			try {
+				const topic = this.topics.find((t) => t.id === topicId);
+				if (!topic) throw new Error('Topic not found');
 
-		// Update Firestore if connected
-		if (db) {
-			const tDocRef = doc(db, 'topics', topicId);
-			await updateDoc(tDocRef, updatedData);
-		}
+				// Update Firestore if connected
+				if (db) {
+					const tDocRef = doc(db, 'topics', topicId);
+					await updateDoc(tDocRef, updatedData);
+				}
 
-		// Update local state
-		Object.assign(topic, updatedData);
-		this.reindexProjects();
-	} catch (err) {
-		console.error('updateTopic error', err);
-		throw err;
-	}
-},
+				// Update local state
+				Object.assign(topic, updatedData);
+				this.reindexProjects();
+			} catch (err) {
+				console.error('updateTopic error', err);
+				throw err;
+			}
+		},
 
+		/**
+		 * Adds a new project to a topic
+		 * 
+		 * Creates a new project within the specified topic. If the topic doesn't exist,
+		 * it creates both the topic and the project.
+		 * 
+		 * @param topicId - ID of the topic to add the project to
+		 * @param newProject - The project data to add
+		 * @throws {Error} When operation fails
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.addProject('programming', newProject);
+		 */
 		async addProject(topicId: string, newProject: Project): Promise<void> {
 			const nuxtApp = useNuxtApp();
 			const db = (nuxtApp as any).$db;
 			try {
+				// Persist to Firestore if available
 				if (db) {
 					const pDocRef = doc(
 						db,
@@ -221,10 +320,13 @@ export const useDashboardStore = defineStore('dashboard', {
 						endDate: newProject.endDate,
 					});
 				}
+				
+				// Update local state
 				const topic = this.topics.find((t) => t.id === topicId);
 				if (topic) {
 					topic.projects.push(newProject);
 				} else {
+					// Create new topic if it doesn't exist
 					this.topics.push({
 						id: topicId,
 						name: topicId,
@@ -238,6 +340,17 @@ export const useDashboardStore = defineStore('dashboard', {
 			}
 		},
 
+		/**
+		 * Adds a note to a project
+		 * 
+		 * @param projectId - ID of the project to add the note to
+		 * @param note - The note data to add
+		 * @throws {Error} When project is not found
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.addNote('project-123', { date: '2024-01-01', content: 'Note content' });
+		 */
 		async addNote(projectId: string, note: Note): Promise<void> {
 			const nuxtApp = useNuxtApp();
 			const db = (nuxtApp as any).$db;
@@ -245,6 +358,8 @@ export const useDashboardStore = defineStore('dashboard', {
 				const lookup = this.projectIndex[projectId];
 				if (!lookup) throw new Error('Project not found in index');
 				const { topicId } = lookup;
+				
+				// Persist to Firestore if available
 				if (db) {
 					const notesCol = collection(
 						db,
@@ -256,6 +371,8 @@ export const useDashboardStore = defineStore('dashboard', {
 					);
 					await addDoc(notesCol, note);
 				}
+				
+				// Update local state
 				lookup.project.notes.push(note);
 				this.reindexProjects();
 			} catch (err) {
@@ -264,6 +381,17 @@ export const useDashboardStore = defineStore('dashboard', {
 			}
 		},
 
+		/**
+		 * Updates a project's status
+		 * 
+		 * @param projectId - ID of the project to update
+		 * @param status - New status for the project
+		 * @throws {Error} When project is not found
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.updateProjectStatus('project-123', 'completed');
+		 */
 		async updateProjectStatus(
 			projectId: string,
 			status: ProjectStatus
@@ -274,6 +402,7 @@ export const useDashboardStore = defineStore('dashboard', {
 			if (!lookup) throw new Error('Project not found');
 			const { topicId } = lookup;
 			try {
+				// Update Firestore if connected
 				if (db) {
 					const pDocRef = doc(
 						db,
@@ -284,6 +413,8 @@ export const useDashboardStore = defineStore('dashboard', {
 					);
 					await updateDoc(pDocRef, { status });
 				}
+				
+				// Update local state
 				lookup.project.status = status;
 				this.reindexProjects();
 			} catch (err) {
@@ -292,10 +423,22 @@ export const useDashboardStore = defineStore('dashboard', {
 			}
 		},
 
+		/**
+		 * Removes a project from a topic
+		 * 
+		 * @param topicId - ID of the topic containing the project
+		 * @param projectId - ID of the project to remove
+		 * @throws {Error} When operation fails
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.removeProject('programming', 'old-project-123');
+		 */
 		async removeProject(topicId: string, projectId: string): Promise<void> {
 			const nuxtApp = useNuxtApp();
 			const db = (nuxtApp as any).$db;
 			try {
+				// Remove from Firestore if connected
 				if (db) {
 					const pDocRef = doc(
 						db,
@@ -306,6 +449,8 @@ export const useDashboardStore = defineStore('dashboard', {
 					);
 					await deleteDoc(pDocRef);
 				}
+				
+				// Remove from local state
 				const topic = this.topics.find((t) => t.id === topicId);
 				if (topic) {
 					topic.projects = topic.projects.filter(
@@ -320,15 +465,51 @@ export const useDashboardStore = defineStore('dashboard', {
 		},
 	},
 
+	/**
+	 * Store getters for computed data access
+	 */
 	getters: {
+		/**
+		 * Gets a topic by its ID
+		 * @param state - Store state
+		 * @returns Topic or undefined if not found
+		 */
 		getTopicById: (state) => (id: string) =>
 			state.topics.find((t) => t.id === id),
+
+		/**
+		 * Gets a project by its ID
+		 * @param state - Store state
+		 * @returns Project or undefined if not found
+		 */
 		getProjectById: (state) => (id: string) =>
 			state.projectIndex[id]?.project,
+
+		/**
+		 * Gets all projects for a topic
+		 * @param state - Store state
+		 * @returns Array of projects or empty array if topic not found
+		 */
 		getTopicProjects: (state) => (topicId: string) =>
 			state.topics.find((t) => t.id === topicId)?.projects || [],
+
+		/**
+		 * Gets all notes for a project
+		 * @param state - Store state
+		 * @returns Array of notes or empty array if project not found
+		 */
 		getProjectNotes: (state) => (projectId: string) =>
 			state.projectIndex[projectId]?.project.notes || [],
+
+		/**
+		 * Calculates progress for a topic
+		 * @param state - Store state
+		 * @returns Tuple of [completedProjects, totalProjects]
+		 * 
+		 * @example
+		 * const [completed, total] = store.getTopicProgress('math');
+		 * const progress = (completed / total) * 100;
+		 */
 		getTopicProgress:
 			(state) =>
 			(topicId: string): [number, number] => {
