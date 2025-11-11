@@ -13,7 +13,6 @@ import {
 	updateDoc,
 } from 'firebase/firestore';
 
-/** Narrowing helper for ProjectStatus */
 function isValidStatus(s: unknown): s is ProjectStatus {
 	return s === 'in-progress' || s === 'completed' || s === 'not-started';
 }
@@ -179,6 +178,29 @@ export const useDashboardStore = defineStore('dashboard', {
 			}
 		},
 
+		async updateTopic(topicId: string, updatedData: Partial<Topic>): Promise<void> {
+	const nuxtApp = useNuxtApp();
+	const db = (nuxtApp as any).$db;
+
+	try {
+		const topic = this.topics.find((t) => t.id === topicId);
+		if (!topic) throw new Error('Topic not found');
+
+		// Update Firestore if connected
+		if (db) {
+			const tDocRef = doc(db, 'topics', topicId);
+			await updateDoc(tDocRef, updatedData);
+		}
+
+		// Update local state
+		Object.assign(topic, updatedData);
+		this.reindexProjects();
+	} catch (err) {
+		console.error('updateTopic error', err);
+		throw err;
+	}
+},
+
 		async addProject(topicId: string, newProject: Project): Promise<void> {
 			const nuxtApp = useNuxtApp();
 			const db = (nuxtApp as any).$db;
@@ -242,7 +264,6 @@ export const useDashboardStore = defineStore('dashboard', {
 			}
 		},
 
-		// IMPORTANT: update project's status both in Firestore (if available) and in local state
 		async updateProjectStatus(
 			projectId: string,
 			status: ProjectStatus

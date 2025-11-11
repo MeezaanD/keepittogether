@@ -10,8 +10,7 @@
 		<div class="mt-3 meta">
 			Started: {{ formatDate(project.startDate) }}
 			<span v-if="project.endDate">
-				| Ended: {{ formatDate(project.endDate) }}</span
-			>
+				| Ended: {{ formatDate(project.endDate) }}</span>
 		</div>
 	</div>
 </template>

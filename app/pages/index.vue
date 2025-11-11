@@ -8,11 +8,7 @@
 		</div>
 
 		<!-- Error state -->
-		<div
-			v-if="error"
-			class="note"
-			style="background: #fff3f3; border-color: #f8d7da; color: #7f1d1d"
-		>
+		<div v-if="error" class="note" style="background: #fff3f3; border-color: #f8d7da; color: #7f1d1d">
 			<strong>Error:</strong> {{ error }}
 			<div style="margin-top: 0.5rem">
 				<button class="btn" @click="reload">Retry</button>
@@ -20,24 +16,11 @@
 		</div>
 
 		<!-- Topics grid -->
-		<div
-			v-if="!loading && !error"
-			class="grid-topics"
-			style="margin-top: 0.75rem"
-		>
-			<NuxtLink
-				v-for="topic in topics"
-				:key="topic.id"
-				:to="`/topics/${topic.id}`"
-				class="link"
-				style="text-decoration: none; display: block"
-			>
-				<TopicCard
-					:topic="topic"
-					:completed="getProgress(topic.id)[0]"
-					:total="getProgress(topic.id)[1]"
-					:project-count="topic.projects.length"
-				/>
+		<div v-if="!loading && !error" class="grid-topics" style="margin-top: 0.75rem">
+			<NuxtLink v-for="topic in topics" :key="topic.id" :to="`/topics/${topic.id}`" class="link"
+				style="text-decoration: none; display: block">
+				<TopicCard :topic="topic" :completed="getProgress(topic.id)[0]" :total="getProgress(topic.id)[1]"
+					:project-count="topic.projects.length" />
 			</NuxtLink>
 
 			<!-- When there are no topics (shouldn't happen with initialData) -->
@@ -109,6 +92,7 @@ async function reload() {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
+
 @media (min-width: 1024px) {
 	.grid-topics {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -119,12 +103,14 @@ async function reload() {
 	color: #6b7280;
 	font-size: 0.95rem;
 }
+
 .note {
 	padding: 0.75rem;
 	background: #fff;
 	border: 1px solid #fde2e2;
 	border-radius: 8px;
 }
+
 .btn {
 	background: #2563eb;
 	color: white;
@@ -134,6 +120,7 @@ async function reload() {
 	cursor: pointer;
 	font-weight: 600;
 }
+
 .link {
 	color: inherit;
 }

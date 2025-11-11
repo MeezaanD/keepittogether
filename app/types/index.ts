@@ -1,9 +1,9 @@
-export interface Note {
-	date: string;
-	content: string;
+export interface Topic {
+	id: string;
+	name: string;
+	description?: string;
+	projects: Project[];
 }
-
-export type ProjectStatus = 'in-progress' | 'completed' | 'not-started';
 
 export interface Project {
 	id: string;
@@ -15,8 +15,9 @@ export interface Project {
 	notes: Note[];
 }
 
-export interface Topic {
-	id: string;
-	name: string;
-	projects: Project[];
+export type ProjectStatus = 'in-progress' | 'completed' | 'not-started';
+
+export interface Note {
+	date: string;
+	content: string;
 }

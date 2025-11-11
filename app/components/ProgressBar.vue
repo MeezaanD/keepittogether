@@ -1,10 +1,7 @@
 <template>
 	<div class="progress-outer">
-		<div
-			class="progress-inner"
-			:class="{ complete: completedRatio >= 1 }"
-			:style="{ width: Math.round(completedRatio * 100) + '%' }"
-		></div>
+		<div class="progress-inner" :class="{ complete: completedRatio >= 1 }"
+			:style="{ width: Math.round(completedRatio * 100) + '%' }"></div>
 	</div>
 </template>
 

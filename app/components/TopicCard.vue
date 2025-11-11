@@ -7,11 +7,8 @@
 
 		<div class="mt-2">
 			<div class="progress-outer" aria-hidden>
-				<div
-					class="progress-inner"
-					:class="{ complete: completedRatio >= 1 }"
-					:style="{ width: Math.round(completedRatio * 100) + '%' }"
-				></div>
+				<div class="progress-inner" :class="{ complete: completedRatio >= 1 }"
+					:style="{ width: Math.round(completedRatio * 100) + '%' }"></div>
 			</div>
 			<div class="mt-3 small muted">
 				{{ completed }} of {{ total }} completed
