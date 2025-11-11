@@ -1,0 +1,33 @@
+{
+	// Formatting & Prettier
+	"editor.formatOnSave": true,
+	"[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[vue]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[python]": { "editor.defaultFormatter": "ms-python.black-formatter" },
+	"[go]": { "editor.defaultFormatter": "golang.go" },
+
+	// Tabs & Indentation
+	"editor.insertSpaces": false,
+	"editor.tabSize": 4,
+	"editor.detectIndentation": false,
+
+	// Show invisible characters (tabs as arrows)
+	"editor.renderWhitespace": "all",
+	"editor.renderControlCharacters": true,
+	"editor.guides.indentation": true,
+	"editor.guides.highlightActiveIndentation": true,
+
+	// Clean up on save
+	"files.trimTrailingWhitespace": true,
+	"files.insertFinalNewline": true,
+	"files.trimFinalNewlines": true,
+
+	// Editor look & feel
+	"editor.fontLigatures": true,
+	"editor.fontSize": 14,
+	"editor.lineHeight": 1.6
+}
