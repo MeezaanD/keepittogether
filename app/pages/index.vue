@@ -2,6 +2,8 @@
 	<div style="padding: 1rem 0">
 		<h2 class="title-lg" style="margin-bottom: 0.75rem">Topics Overview</h2>
 
+		<CreateTopic v-model:showAddModal="showAddModal" />
+
 		<!-- Loading state -->
 		<div v-if="loading" class="muted" aria-live="polite">
 			Loading topics…
@@ -17,13 +19,14 @@
 
 		<!-- Topics grid -->
 		<div v-if="!loading && !error" class="grid-topics" style="margin-top: 0.75rem">
+			<!-- Topic cards -->
 			<NuxtLink v-for="topic in topics" :key="topic.id" :to="`/topics/${topic.id}`" class="link"
 				style="text-decoration: none; display: block">
 				<TopicCard :topic="topic" :completed="getProgress(topic.id)[0]" :total="getProgress(topic.id)[1]"
 					:project-count="topic.projects.length" />
 			</NuxtLink>
 
-			<!-- When there are no topics (shouldn't happen with initialData) -->
+			<!-- Empty state -->
 			<div v-if="topics.length === 0" class="muted" style="padding: 1rem">
 				No topics found. You can reload the initial data.
 				<div style="margin-top: 0.5rem">
@@ -40,10 +43,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useDashboardStore } from '~/stores/dashboard';
 import TopicCard from '~/components/TopicCard.vue';
+import CreateTopic from '~/components/CreateTopic.vue';
 
 const store = useDashboardStore();
 const loading = ref(true);
 const error = ref<string | null>(null);
+const showAddModal = ref(false);
 
 onMounted(async () => {
 	loading.value = true;

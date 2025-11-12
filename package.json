@@ -13,7 +13,8 @@
 		"firebase": "^12.5.0",
 		"markdown-it": "^14.1.0",
 		"nuxt": "^4.2.1",
-		"pinia": "^2.1.7"
+		"pinia": "^2.1.7",
+		"uuid": "^13.0.0"
 	},
 	"devDependencies": {
 		"@element-plus/nuxt": "^1.1.4",

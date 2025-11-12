@@ -252,6 +252,49 @@ export const useDashboardStore = defineStore('dashboard', {
 		},
 
 		/**
+		 * Creates a new topic
+		 * 
+		 * @param topicName - Name of the topic to create
+		 * @throws {Error} When creation fails
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.createTopic('Machine Learning');
+		 */
+		async createTopic(topicName: string): Promise<void> {
+			const nuxtApp = useNuxtApp();
+			const db = (nuxtApp as any).$db;
+
+			try {
+				// Generate a simple id (you could use uuid instead if you want)
+				const topicId = topicName.toLowerCase().replace(/\s+/g, '-');
+
+				// Check if it already exists
+				if (this.topics.find((t) => t.id === topicId)) {
+					throw new Error(`Topic "${topicName}" already exists.`);
+				}
+
+				// Create Firestore doc if available
+				if (db) {
+					const topicsCol = collection(db, 'topics');
+					await setDoc(doc(topicsCol, topicId), { name: topicName });
+				}
+
+				// Update local state
+				this.topics.push({
+					id: topicId,
+					name: topicName,
+					projects: [],
+				});
+
+				this.reindexProjects();
+			} catch (err) {
+				console.error('createTopic error', err);
+				throw err;
+			}
+		},
+
+		/**
 		 * Updates a topic with new data
 		 * 
 		 * @param topicId - ID of the topic to update
@@ -281,6 +324,33 @@ export const useDashboardStore = defineStore('dashboard', {
 				this.reindexProjects();
 			} catch (err) {
 				console.error('updateTopic error', err);
+				throw err;
+			}
+		},
+
+		/**
+		 * Deletes a topic by ID
+		 * 
+		 * @param topicId - The ID of the topic to delete
+		 * @throws {Error} If deletion fails
+		 * @returns {Promise<void>}
+		 */
+		async deleteTopic(topicId: string): Promise<void> {
+			const nuxtApp = useNuxtApp();
+			const db = (nuxtApp as any).$db;
+
+			try {
+				// Remove from Firestore if available
+				if (db) {
+					const topicDocRef = doc(db, 'topics', topicId);
+					await deleteDoc(topicDocRef);
+				}
+
+				// Remove from local state
+				this.topics = this.topics.filter((t) => t.id !== topicId);
+				this.reindexProjects();
+			} catch (err) {
+				console.error('deleteTopic error', err);
 				throw err;
 			}
 		},
