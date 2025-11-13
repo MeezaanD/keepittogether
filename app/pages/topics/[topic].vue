@@ -15,12 +15,8 @@
 					<div class="card-header">
 						<span class="card-title">Topic Information</span>
 						<el-button-group>
-							<el-button
-								:type="isEditing ? 'danger' : 'primary'"
-								:text="true"
-								:icon="isEditing ? Close : Edit"
-								@click="isEditing = !isEditing"
-							>
+							<el-button :type="isEditing ? 'danger' : 'primary'" :text="true"
+								:icon="isEditing ? Close : Edit" @click="isEditing = !isEditing">
 								{{ isEditing ? 'Cancel Edit' : 'Edit Topic' }}
 							</el-button>
 						</el-button-group>
@@ -33,63 +29,32 @@
 							<el-text class="topic-title" size="large" tag="h1">
 								{{ topic.name }}
 							</el-text>
-							<el-text
-								v-if="topic.description"
-								class="topic-description"
-								type="info"
-								size="default"
-							>
+							<el-text v-if="topic.description" class="topic-description" type="info" size="default">
 								{{ topic.description }}
 							</el-text>
-							<el-text
-								v-else
-								class="topic-description"
-								type="info"
-								size="default"
-							>
+							<el-text v-else class="topic-description" type="info" size="default">
 								No description provided
 							</el-text>
 						</div>
 
-						<el-form
-							v-else
-							@submit.prevent="saveTopicEdits"
-							class="topic-edit-form"
-						>
+						<el-form v-else @submit.prevent="saveTopicEdits" class="topic-edit-form">
 							<el-form-item>
 								<template #label>
-									<el-text type="primary" size="small"
-										>Topic Name</el-text
-									>
+									<el-text type="primary" size="small">Topic Name</el-text>
 								</template>
-								<el-input
-									v-model="editForm.name"
-									placeholder="Enter topic name"
-									size="large"
-									class="title-input"
-									required
-								/>
+								<el-input v-model="editForm.name" placeholder="Enter topic name" size="large"
+									class="title-input" required />
 							</el-form-item>
 							<el-form-item>
 								<template #label>
-									<el-text type="primary" size="small"
-										>Description</el-text
-									>
+									<el-text type="primary" size="small">Description</el-text>
 								</template>
-								<el-input
-									v-model="editForm.description"
-									type="textarea"
-									:rows="3"
-									placeholder="Describe this topic..."
-									show-word-limit
-									maxlength="500"
-									resize="none"
-								/>
+								<el-input v-model="editForm.description" type="textarea" :rows="3"
+									placeholder="Describe this topic..." show-word-limit maxlength="500"
+									resize="none" />
 							</el-form-item>
 							<el-form-item class="form-actions">
-								<el-button @click="isEditing = false"
-									>Cancel</el-button
-								>
+								<el-button @click="isEditing = false">Cancel</el-button>
 								<el-button type="primary" native-type="submit">
 									Save Changes
 								</el-button>
@@ -100,61 +65,32 @@
 					<div class="topic-stats-section">
 						<el-card shadow="never" class="stats-card">
 							<template #header>
-								<el-text
-									type="primary"
-									size="small"
-									tag="strong"
-									>Overview</el-text
-								>
+								<el-text type="primary" size="small" tag="strong">Overview</el-text>
 							</template>
 							<div class="stats-content">
 								<div class="stat-item">
-									<el-text
-										class="stat-number"
-										size="large"
-										type="primary"
-									>
+									<el-text class="stat-number" size="large" type="primary">
 										{{ projects.length }}
 									</el-text>
-									<el-text
-										class="stat-label"
-										type="info"
-										size="small"
-									>
+									<el-text class="stat-label" type="info" size="small">
 										Project{{
 											projects.length !== 1 ? 's' : ''
 										}}
 									</el-text>
 								</div>
 								<div class="stat-item">
-									<el-text
-										class="stat-number"
-										size="large"
-										type="success"
-									>
+									<el-text class="stat-number" size="large" type="success">
 										{{ completedProjects }}
 									</el-text>
-									<el-text
-										class="stat-label"
-										type="info"
-										size="small"
-									>
+									<el-text class="stat-label" type="info" size="small">
 										Completed
 									</el-text>
 								</div>
 								<div class="stat-item">
-									<el-text
-										class="stat-number"
-										size="large"
-										type="warning"
-									>
+									<el-text class="stat-number" size="large" type="warning">
 										{{ inProgressProjects }}
 									</el-text>
-									<el-text
-										class="stat-label"
-										type="info"
-										size="small"
-									>
+									<el-text class="stat-label" type="info" size="small">
 										In Progress
 									</el-text>
 								</div>
@@ -169,9 +105,7 @@
 				<template #header>
 					<div class="projects-header">
 						<div class="projects-title-section">
-							<el-text size="large" tag="h2" type="primary"
-								>Projects</el-text
-							>
+							<el-text size="large" tag="h2" type="primary">Projects</el-text>
 							<el-text type="info" size="small">
 								{{ projects.length }} project{{
 									projects.length !== 1 ? 's' : ''
@@ -179,39 +113,24 @@
 								in this topic
 							</el-text>
 						</div>
-						<CreateProject
-							:topic-id="topicId"
-							@created="handleProjectCreated"
-						/>
+						<CreateProject :topic-id="topicId" @created="handleProjectCreated" />
 					</div>
 				</template>
 
 				<div v-if="projects.length" class="projects-grid">
-					<NuxtLink
-						v-for="project in projects"
-						:key="project.id"
-						:to="`/projects/${project.id}`"
-						class="project-link"
-					>
+					<NuxtLink v-for="project in projects" :key="project.id" :to="`/projects/${project.id}`"
+						class="project-link">
 						<ProjectCard :project="project" />
 					</NuxtLink>
 				</div>
 
-				<el-empty
-					v-else
-					description="No projects yet"
-					:image-size="150"
-				>
+				<el-empty v-else description="No projects yet" :image-size="150">
 					<template #description>
 						<div class="empty-description">
 							<el-text type="info" size="default">
 								No projects have been added to this topic yet.
 							</el-text>
-							<el-text
-								type="info"
-								size="small"
-								style="margin-top: 0.5rem; display: block"
-							>
+							<el-text type="info" size="small" style="margin-top: 0.5rem; display: block">
 								Create your first project to get started.
 							</el-text>
 						</div>
@@ -220,22 +139,13 @@
 			</el-card>
 		</div>
 
-		<el-empty
-			v-else
-			description="Topic not found"
-			:image-size="150"
-			class="not-found-state"
-		>
+		<el-empty v-else description="Topic not found" :image-size="150" class="not-found-state">
 			<template #description>
 				<div class="empty-description">
 					<el-text type="info" size="default">
 						The topic you're looking for doesn't exist.
 					</el-text>
-					<el-button
-						type="primary"
-						style="margin-top: 1rem"
-						@click="$router.push('/')"
-					>
+					<el-button type="primary" style="margin-top: 1rem" @click="$router.push('/')">
 						Back to Dashboard
 					</el-button>
 				</div>
@@ -304,7 +214,7 @@ async function saveTopicEdits() {
 
 <style scoped>
 .topic-page {
-	max-width: 1200px;
+	/* max-width: 1200px; */
 	margin: 0 auto;
 	padding: 1rem;
 }

@@ -1,9 +1,6 @@
 <template>
 	<div class="project-page">
-		<el-page-header
-			@back="$router.push(topic ? `/topics/${topic.id}` : '/')"
-			class="page-header"
-		>
+		<el-page-header @back="$router.push(topic ? `/topics/${topic.id}` : '/')" class="page-header">
 			<template #content>
 				<div class="header-content">
 					<span class="header-title">Project Details</span>
@@ -18,23 +15,12 @@
 					<div class="card-header">
 						<span class="card-title">Project Information</span>
 						<el-button-group>
-							<el-button
-								v-if="!isEditing"
-								type="primary"
-								:text="true"
-								:icon="Edit"
-								@click="startEditing"
-								title="Edit project"
-							>
+							<el-button v-if="!isEditing" type="primary" :text="true" :icon="Edit" @click="startEditing"
+								title="Edit project">
 								Edit
 							</el-button>
-							<el-button
-								type="danger"
-								:text="true"
-								:icon="Delete"
-								@click="confirmDelete"
-								title="Delete project"
-							>
+							<el-button type="danger" :text="true" :icon="Delete" @click="confirmDelete"
+								title="Delete project">
 								Delete
 							</el-button>
 						</el-button-group>
@@ -44,18 +30,10 @@
 				<div class="project-main-info">
 					<div class="project-text-content">
 						<div v-if="!isEditing" class="project-display">
-							<el-text
-								class="project-title"
-								size="large"
-								tag="h1"
-							>
+							<el-text class="project-title" size="large" tag="h1">
 								{{ project.title }}
 							</el-text>
-							<el-text
-								class="project-description"
-								type="info"
-								size="default"
-							>
+							<el-text class="project-description" type="info" size="default">
 								{{
 									project.description ||
 									'No description provided'
@@ -63,50 +41,25 @@
 							</el-text>
 						</div>
 
-						<el-form
-							v-else
-							@submit.prevent="saveProjectEdits"
-							class="project-edit-form"
-						>
+						<el-form v-else @submit.prevent="saveProjectEdits" class="project-edit-form">
 							<el-form-item>
 								<template #label>
-									<el-text type="primary" size="small"
-										>Project Title</el-text
-									>
+									<el-text type="primary" size="small">Project Title</el-text>
 								</template>
-								<el-input
-									v-model="editForm.title"
-									placeholder="Enter project title"
-									size="large"
-									class="title-input"
-									required
-								/>
+								<el-input v-model="editForm.title" placeholder="Enter project title" size="large"
+									class="title-input" required />
 							</el-form-item>
 							<el-form-item>
 								<template #label>
-									<el-text type="primary" size="small"
-										>Description</el-text
-									>
+									<el-text type="primary" size="small">Description</el-text>
 								</template>
-								<el-input
-									v-model="editForm.description"
-									type="textarea"
-									:rows="3"
-									placeholder="Describe your project..."
-									show-word-limit
-									maxlength="500"
-									resize="none"
-								/>
+								<el-input v-model="editForm.description" type="textarea" :rows="3"
+									placeholder="Describe your project..." show-word-limit maxlength="500"
+									resize="none" />
 							</el-form-item>
 							<el-form-item class="form-actions">
-								<el-button @click="cancelEditing"
-									>Cancel</el-button
-								>
-								<el-button
-									type="primary"
-									native-type="submit"
-									:loading="busy"
-								>
+								<el-button @click="cancelEditing">Cancel</el-button>
+								<el-button type="primary" native-type="submit" :loading="busy">
 									Save Changes
 								</el-button>
 							</el-form-item>
@@ -116,81 +69,40 @@
 					<div class="project-status-section">
 						<el-card shadow="never" class="status-card">
 							<template #header>
-								<el-text
-									type="primary"
-									size="small"
-									tag="strong"
-									>Status</el-text
-								>
+								<el-text type="primary" size="small" tag="strong">Status</el-text>
 							</template>
 							<div class="status-content">
-								<el-tag
-									:type="statusTagType"
-									effect="light"
-									size="large"
-									class="status-badge"
-								>
-									<i
-										:class="statusIcon"
-										class="status-icon"
-									></i>
+								<el-tag :type="statusTagType" effect="light" size="large" class="status-badge">
+									<i :class="statusIcon" class="status-icon"></i>
 									{{ statusDisplayText }}
 								</el-tag>
-								<el-select
-									v-model="statusSelect"
-									placeholder="Change status"
-									:disabled="busy"
-									class="status-select"
-									@change="onStatusChange"
-								>
-									<el-option
-										label="Not started"
-										value="not-started"
-									/>
-									<el-option
-										label="In progress"
-										value="in-progress"
-									/>
-									<el-option
-										label="Completed"
-										value="completed"
-									/>
+								<el-select v-model="statusSelect" placeholder="Change status" :disabled="busy"
+									class="status-select" @change="onStatusChange">
+									<el-option label="Not started" value="not-started" />
+									<el-option label="In progress" value="in-progress" />
+									<el-option label="Completed" value="completed" />
 								</el-select>
 							</div>
 						</el-card>
 
 						<el-card shadow="never" class="timeline-card">
 							<template #header>
-								<el-text
-									type="primary"
-									size="small"
-									tag="strong"
-									>Timeline</el-text
-								>
+								<el-text type="primary" size="small" tag="strong">Timeline</el-text>
 							</template>
 							<div class="timeline-content">
 								<div class="timeline-item">
 									<i class="el-icon-time timeline-icon"></i>
 									<div>
-										<el-text type="info" size="small"
-											>Started</el-text
-										>
+										<el-text type="info" size="small">Started</el-text>
 										<div class="timeline-date">
 											{{ formatDate(project.startDate) }}
 										</div>
 									</div>
 								</div>
-								<div
-									v-if="project.endDate"
-									class="timeline-item"
-								>
-									<i
-										class="el-icon-finished timeline-icon"
-									></i>
+								<div v-if="project.endDate" class="timeline-item">
+									<i class="el-icon-finished timeline-icon"></i>
 									<div>
-										<el-text type="info" size="small"
-											>Completed</el-text
-										>
+										<el-text type="info" size="small">Completed</el-text>
 										<div class="timeline-date">
 											{{ formatDate(project.endDate) }}
 										</div>
@@ -207,47 +119,29 @@
 				<template #header>
 					<div class="notes-header">
 						<div class="notes-title-section">
-							<el-text size="large" tag="h2" type="primary"
-								>Project Notes</el-text
-							>
+							<el-text size="large" tag="h2" type="primary">Project Notes</el-text>
 							<el-text type="info" size="small">
 								{{ project.notes.length }} note{{
 									project.notes.length !== 1 ? 's' : ''
 								}}
 							</el-text>
 						</div>
-						<CreateNote
-							:project-id="projectId"
-							@created="handleNoteCreated"
-						/>
+						<CreateNote :project-id="projectId" @created="handleNoteCreated" />
 					</div>
 				</template>
 
-				<NotesList
-					:notes="project.notes"
-					:project-id="projectId"
-					@deleted="handleNoteDeleted"
-					@updated="handleNoteUpdated"
-				/>
+				<NotesList :notes="project.notes" :project-id="projectId" @deleted="handleNoteDeleted"
+					@updated="handleNoteUpdated" />
 			</el-card>
 		</div>
 
-		<el-empty
-			v-else
-			description="Project not found"
-			:image-size="150"
-			class="not-found-state"
-		>
+		<el-empty v-else description="Project not found" :image-size="150" class="not-found-state">
 			<template #description>
 				<div class="empty-description">
 					<el-text type="info" size="default">
 						The project you're looking for doesn't exist.
 					</el-text>
-					<el-button
-						type="primary"
-						style="margin-top: 1rem"
-						@click="$router.push('/')"
-					>
+					<el-button type="primary" style="margin-top: 1rem" @click="$router.push('/')">
 						Back to Dashboard
 					</el-button>
 				</div>
@@ -453,7 +347,7 @@ const statusDisplayText = computed(() => {
 
 <style scoped>
 .project-page {
-	max-width: 1200px;
+	/* max-width: 1200px; */
 	margin: 0 auto;
 	padding: 1rem;
 }

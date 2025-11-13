@@ -2,17 +2,8 @@
 	<div>
 		<el-button plain @click="showModal = true"> Add Topic </el-button>
 
-		<el-dialog
-			v-model="showModal"
-			title="Create New Topic"
-			width="500"
-			:before-close="handleClose"
-		>
-			<el-input
-				v-model="newTopicName"
-				placeholder="Enter topic name"
-				@keyup.enter="handleCreate"
-			/>
+		<el-dialog v-model="showModal" title="Create New Topic" width="500" :before-close="handleClose">
+			<el-input v-model="newTopicName" placeholder="Enter topic name" @keyup.enter="handleCreate" />
 
 			<template #footer>
 				<span class="dialog-footer">

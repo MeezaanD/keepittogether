@@ -5,32 +5,16 @@
 			Add Project
 		</el-button>
 
-		<el-dialog
-			v-model="showModal"
-			title="Create New Project"
-			width="500"
-			:before-close="handleClose"
-		>
+		<el-dialog v-model="showModal" title="Create New Project" width="500" :before-close="handleClose">
 			<el-form @submit.prevent="handleCreate" :model="form">
 				<el-form-item label="Project Title" required>
-					<el-input
-						v-model="form.title"
-						required
-						placeholder="Project title"
-					/>
+					<el-input v-model="form.title" required placeholder="Project title" />
 				</el-form-item>
 				<el-form-item label="Description" required>
-					<el-input
-						v-model="form.description"
-						required
-						placeholder="Description"
-					/>
+					<el-input v-model="form.description" required placeholder="Description" />
 				</el-form-item>
 				<el-form-item label="Status">
-					<el-select
-						v-model="form.status"
-						placeholder="Select status"
-					>
+					<el-select v-model="form.status" placeholder="Select status">
 						<el-option label="In Progress" value="in-progress" />
 						<el-option label="Completed" value="completed" />
 						<el-option label="Not Started" value="not-started" />

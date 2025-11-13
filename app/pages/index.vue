@@ -2,12 +2,7 @@
 	<div class="dashboard-page">
 		<div class="page-header">
 			<div class="header-content">
-				<el-text
-					class="header-title"
-					size="xxl"
-					tag="h1"
-					type="primary"
-				>
+				<el-text class="header-title" size="large" tag="h1" type="primary">
 					Learning Dashboard
 				</el-text>
 				<el-text type="info" size="small" class="header-subtitle">
@@ -22,18 +17,10 @@
 				<el-col :xs="24" :sm="8">
 					<el-card shadow="never" class="stat-card">
 						<div class="stat-content">
-							<el-text
-								class="stat-number"
-								type="primary"
-								size="xxl"
-							>
+							<el-text class="stat-number" type="primary" size="large">
 								{{ topics.length }}
 							</el-text>
-							<el-text
-								class="stat-label"
-								type="info"
-								size="small"
-							>
+							<el-text class="stat-label" type="info" size="small">
 								Total Topics
 							</el-text>
 						</div>
@@ -42,18 +29,10 @@
 				<el-col :xs="24" :sm="8">
 					<el-card shadow="never" class="stat-card">
 						<div class="stat-content">
-							<el-text
-								class="stat-number"
-								type="success"
-								size="xxl"
-							>
+							<el-text class="stat-number" type="success" size="large">
 								{{ totalProjects }}
 							</el-text>
-							<el-text
-								class="stat-label"
-								type="info"
-								size="small"
-							>
+							<el-text class="stat-label" type="info" size="small">
 								Total Projects
 							</el-text>
 						</div>
@@ -62,18 +41,10 @@
 				<el-col :xs="24" :sm="8">
 					<el-card shadow="never" class="stat-card">
 						<div class="stat-content">
-							<el-text
-								class="stat-number"
-								type="warning"
-								size="xxl"
-							>
+							<el-text class="stat-number" type="warning" size="large">
 								{{ completionRate }}%
 							</el-text>
-							<el-text
-								class="stat-label"
-								type="info"
-								size="small"
-							>
+							<el-text class="stat-label" type="info" size="small">
 								Completion Rate
 							</el-text>
 						</div>
@@ -88,10 +59,7 @@
 						<el-text size="large" tag="h2" type="primary">
 							Your Topics
 						</el-text>
-						<CreateTopic
-							v-model:showAddModal="showAddModal"
-							@created="handleTopicCreated"
-						/>
+						<CreateTopic v-model:showAddModal="showAddModal" @created="handleTopicCreated" />
 					</div>
 				</template>
 
@@ -99,40 +67,23 @@
 				<el-skeleton v-if="loading" :rows="6" animated />
 
 				<!-- Error state -->
-				<el-alert
-					v-else-if="error"
-					:title="error"
-					type="error"
-					:closable="false"
-					show-icon
-					class="error-alert"
-				>
+				<el-alert v-else-if="error" :title="error" type="error" :closable="false" show-icon class="error-alert">
 					<template #action>
-						<el-button type="danger" text @click="reload"
-							>Retry</el-button
-						>
+						<el-button type="danger" text @click="reload">Retry</el-button>
 					</template>
 				</el-alert>
 
 				<!-- Topics grid -->
 				<div v-if="!loading && !error">
 					<!-- Empty state -->
-					<el-empty
-						v-if="topics.length === 0"
-						description="No topics found"
-						:image-size="200"
-						class="empty-state"
-					>
+					<el-empty v-if="topics.length === 0" description="No topics found" :image-size="200"
+						class="empty-state">
 						<template #description>
 							<div class="empty-description">
 								<el-text type="info" size="default">
 									No learning topics found yet.
 								</el-text>
-								<el-text
-									type="info"
-									size="small"
-									style="margin-top: 0.5rem; display: block"
-								>
+								<el-text type="info" size="small" style="margin-top: 0.5rem; display: block">
 									Create your first topic to organize your
 									learning projects.
 								</el-text>
@@ -140,10 +91,7 @@
 						</template>
 						<template #extra>
 							<el-button-group style="margin-top: 1rem">
-								<el-button
-									type="primary"
-									@click="showAddModal = true"
-								>
+								<el-button type="primary" @click="showAddModal = true">
 									Create First Topic
 								</el-button>
 								<el-button @click="reload">
@@ -155,18 +103,10 @@
 
 					<!-- Topics grid -->
 					<div v-else class="topics-grid">
-						<NuxtLink
-							v-for="topic in topics"
-							:key="topic.id"
-							:to="`/topics/${topic.id}`"
-							class="topic-link"
-						>
-							<TopicCard
-								:topic="topic"
-								:completed="getProgress(topic.id)[0]"
-								:total="getProgress(topic.id)[1]"
-								:project-count="topic.projects.length"
-							/>
+						<NuxtLink v-for="topic in topics" :key="topic.id" :to="`/topics/${topic.id}`"
+							class="topic-link">
+							<TopicCard :topic="topic" :completed="getProgress(topic.id)[0]"
+								:total="getProgress(topic.id)[1]" :project-count="topic.projects.length" />
 						</NuxtLink>
 					</div>
 				</div>
@@ -254,7 +194,7 @@ function handleTopicCreated() {
 
 <style scoped>
 .dashboard-page {
-	max-width: 1200px;
+	/* max-width: 1200px; */
 	margin: 0 auto;
 	padding: 1rem;
 }

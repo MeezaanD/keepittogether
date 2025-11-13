@@ -2,79 +2,43 @@
 	<div class="notes-container">
 		<div v-if="notes.length">
 			<el-timeline class="notes-timeline">
-				<el-timeline-item
-					v-for="(note, idx) in notes"
-					:key="idx"
-					:timestamp="formatDate(note.date)"
-					placement="top"
-					:type="getTimelineType(note.date)"
-					:hide-timestamp="false"
-				>
+				<el-timeline-item v-for="(note, idx) in notes" :key="idx" :timestamp="formatDate(note.date)"
+					placement="top" :type="getTimelineType(note.date)" :hide-timestamp="false">
 					<el-card class="note-card" shadow="hover">
 						<template #header>
 							<div class="note-header">
 								<h4 class="note-title">Note</h4>
 								<div class="note-actions">
-									<el-button
-										type="primary"
-										text
-										size="small"
-										:icon="Edit"
-										@click="editNote(idx)"
-										title="Edit note"
-										class="edit-btn"
-									/>
-									<el-button
-										type="danger"
-										text
-										size="small"
-										:icon="Delete"
-										@click="confirmDeleteNote(idx)"
-										title="Delete note"
-										class="delete-btn"
-									/>
+									<el-button type="primary" text size="small" :icon="Edit" @click="editNote(idx)"
+										title="Edit note" class="edit-btn" />
+									<el-button type="danger" text size="small" :icon="Delete"
+										@click="confirmDeleteNote(idx)" title="Delete note" class="delete-btn" />
 								</div>
 							</div>
 						</template>
 
 						<div class="note-content-wrapper">
-							<div
-								v-if="!editingNote || editingNote.index !== idx"
-								v-html="renderMarkdown(note.content)"
-								class="note-content"
-							></div>
+							<div v-if="!editingNote || editingNote.index !== idx" v-html="renderMarkdown(note.content)"
+								class="note-content">
+							</div>
 							<div v-else class="edit-form">
 								<el-form @submit.prevent="saveEditedNote">
 									<el-form-item>
-										<el-date-picker
-											v-model="editingNote.data.date"
-											type="date"
-											placeholder="Select date"
-											format="YYYY-MM-DD"
-											value-format="YYYY-MM-DD"
+										<el-date-picker v-model="editingNote.data.date" type="date"
+											placeholder="Select date" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
 											style="
 												width: 100%;
 												margin-bottom: 1rem;
-											"
-										/>
+											" />
 									</el-form-item>
 									<el-form-item>
-										<el-input
-											v-model="editingNote.data.content"
-											type="textarea"
-											:rows="6"
+										<el-input v-model="editingNote.data.content" type="textarea" :rows="6"
 											placeholder="Enter your note content (Markdown supported)"
-											resize="vertical"
-										/>
+											resize="vertical" />
 									</el-form-item>
 									<el-form-item class="form-actions">
-										<el-button @click="cancelEdit"
-											>Cancel</el-button
-										>
-										<el-button
-											type="primary"
-											native-type="submit"
-										>
+										<el-button @click="cancelEdit">Cancel</el-button>
+										<el-button type="primary" native-type="submit">
 											Save Changes
 										</el-button>
 									</el-form-item>
@@ -82,10 +46,7 @@
 							</div>
 						</div>
 
-						<div
-							v-if="!editingNote || editingNote.index !== idx"
-							class="note-footer"
-						>
+						<div v-if="!editingNote || editingNote.index !== idx" class="note-footer">
 							<el-text type="info" size="small">
 								{{ getNotePreview(note.content) }}
 							</el-text>
@@ -102,11 +63,7 @@
 						<el-text type="info" size="default">
 							No notes have been added to this project yet.
 						</el-text>
-						<el-text
-							type="info"
-							size="small"
-							style="margin-top: 0.5rem; display: block"
-						>
+						<el-text type="info" size="small" style="margin-top: 0.5rem; display: block">
 							Add your first note to track progress and ideas.
 						</el-text>
 					</div>
@@ -152,7 +109,7 @@ function getNotePreview(content: string): string {
 		: plainText;
 }
 
-function getTimelineType(date: string): string {
+function getTimelineType(date: string): 'primary' | 'success' | 'info' | 'warning' | 'danger' {
 	const noteDate = new Date(date);
 	const today = new Date();
 	const diffTime = Math.abs(today.getTime() - noteDate.getTime());
@@ -165,6 +122,7 @@ function getTimelineType(date: string): string {
 
 function editNote(noteIndex: number) {
 	const note = props.notes[noteIndex];
+	if (!note) return;
 	editingNote.value = {
 		index: noteIndex,
 		data: {

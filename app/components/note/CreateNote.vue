@@ -5,32 +5,16 @@
 			Add Note
 		</el-button>
 
-		<el-dialog
-			v-model="showModal"
-			title="Add New Note"
-			width="600"
-			:before-close="handleClose"
-		>
+		<el-dialog v-model="showModal" title="Add New Note" width="600" :before-close="handleClose">
 			<el-form @submit.prevent="handleCreate" :model="form">
 				<el-form-item label="Note Content" required>
-					<el-input
-						v-model="form.content"
-						type="textarea"
-						:rows="4"
-						placeholder="Enter your note content (Markdown supported)"
-						required
-						show-word-limit
-						maxlength="1000"
-					/>
+					<el-input v-model="form.content" type="textarea" :rows="4"
+						placeholder="Enter your note content (Markdown supported)" required show-word-limit
+						maxlength="1000" />
 				</el-form-item>
 				<el-form-item label="Note Date">
-					<el-date-picker
-						v-model="form.date"
-						type="date"
-						placeholder="Select date"
-						format="YYYY-MM-DD"
-						value-format="YYYY-MM-DD"
-					/>
+					<el-date-picker v-model="form.date" type="date" placeholder="Select date" format="YYYY-MM-DD"
+						value-format="YYYY-MM-DD" />
 				</el-form-item>
 			</el-form>
 

@@ -3,12 +3,7 @@
 		<template #header>
 			<div class="card-header">
 				<h3 class="topic-title">{{ topic.name }}</h3>
-				<el-button
-					type="danger"
-					text
-					@click.stop.prevent="confirmDelete"
-					title="Delete topic"
-				>
+				<el-button type="danger" text @click.stop.prevent="confirmDelete" title="Delete topic">
 					Delete
 				</el-button>
 			</div>
@@ -18,12 +13,8 @@
 			<span class="muted-text">{{ projectCount }} projects</span>
 
 			<div class="progress-section">
-				<el-progress
-					:percentage="Math.round(completedRatio * 100)"
-					:stroke-width="8"
-					:color="completedRatio >= 1 ? successColor : primaryColor"
-					:show-text="false"
-				/>
+				<el-progress :percentage="Math.round(completedRatio * 100)" :stroke-width="8"
+					:color="completedRatio >= 1 ? successColor : primaryColor" :show-text="false" />
 				<div class="progress-text muted-text">
 					{{ completed }} of {{ total }} completed
 				</div>
