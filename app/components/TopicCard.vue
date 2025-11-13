@@ -1,30 +1,40 @@
 <template>
-	<div class="card" role="article">
-		<div class="row-between mb-1">
-			<h2 class="title-lg">{{ topic.name }}</h2>
-			<!-- Delete button -->
-			<button class="delete-btn" @click.stop.prevent="confirmDelete" title="Delete topic">
-				Delete
-			</button>
-		</div>
-		<span class="muted small">{{ projectCount }} projects</span>
-		<div class="mt-2">
-			<div class="progress-outer" aria-hidden>
-				<div
-					class="progress-inner"
-					:class="{ complete: completedRatio >= 1 }"
-					:style="{ width: Math.round(completedRatio * 100) + '%' }"
-				></div>
+	<el-card class="topic-card" shadow="hover" role="article">
+		<template #header>
+			<div class="card-header">
+				<h3 class="topic-title">{{ topic.name }}</h3>
+				<el-button
+					type="danger"
+					text
+					@click.stop.prevent="confirmDelete"
+					title="Delete topic"
+				>
+					Delete
+				</el-button>
 			</div>
-			<div class="mt-3 small muted">
-				{{ completed }} of {{ total }} completed
+		</template>
+
+		<div class="topic-stats">
+			<span class="muted-text">{{ projectCount }} projects</span>
+
+			<div class="progress-section">
+				<el-progress
+					:percentage="Math.round(completedRatio * 100)"
+					:stroke-width="8"
+					:color="completedRatio >= 1 ? successColor : primaryColor"
+					:show-text="false"
+				/>
+				<div class="progress-text muted-text">
+					{{ completed }} of {{ total }} completed
+				</div>
 			</div>
 		</div>
-	</div>
+	</el-card>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue';
+import { ElMessageBox, ElMessage } from 'element-plus';
 import { useDashboardStore } from '~/stores/dashboard';
 import type { Topic } from '~/types';
 
@@ -36,91 +46,74 @@ const props = defineProps<{
 }>();
 
 const store = useDashboardStore();
+
 const completedRatio = computed(() =>
 	props.total ? props.completed / props.total : 0
 );
 
+const primaryColor = '#409eff';
+const successColor = '#67c23a';
+
 async function confirmDelete() {
-	const confirmMsg = `Are you sure you want to delete "${props.topic.name}"? This action cannot be undone.`;
-	if (confirm(confirmMsg)) {
+	try {
+		await ElMessageBox.confirm(
+			`Are you sure you want to delete "${props.topic.name}"? This action cannot be undone.`,
+			'Delete Topic',
+			{
+				confirmButtonText: 'Delete',
+				cancelButtonText: 'Cancel',
+				type: 'warning',
+				confirmButtonClass: 'el-button--danger',
+			}
+		);
+
 		await store.deleteTopic(props.topic.id);
+		ElMessage.success('Topic deleted successfully');
+	} catch (error) {
+		// User cancelled the deletion
+		if (error !== 'cancel') {
+			ElMessage.error('Failed to delete topic');
+		}
 	}
 }
 </script>
 
 <style scoped>
-.card {
-	background: #fff;
-	border: 1px solid #e5e7eb;
-	border-radius: 12px;
-	padding: 1rem;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-	transition: transform 0.15s ease, box-shadow 0.15s ease;
-	position: relative;
+.topic-card {
+	transition: transform 0.15s ease;
 }
 
-.card:hover {
+.topic-card:hover {
 	transform: translateY(-3px);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.row-between {
+.card-header {
 	display: flex;
-	align-items: center;
 	justify-content: space-between;
+	align-items: center;
+	margin: -0.5rem;
 }
 
-.mb-1 {
-	margin-bottom: 0.25rem;
+.topic-title {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 600;
 }
 
-.mt-2 {
+.topic-stats {
 	margin-top: 0.5rem;
 }
 
-.mt-3 {
+.progress-section {
+	margin-top: 0.5rem;
+}
+
+.progress-text {
 	margin-top: 0.75rem;
-}
-
-.muted {
-	color: #6b7280;
-}
-
-.small {
 	font-size: 0.9rem;
 }
 
-.progress-outer {
-	background: #e5e7eb;
-	border-radius: 9999px;
-	height: 8px;
-	overflow: hidden;
-}
-
-.progress-inner {
-	background: #2563eb;
-	height: 100%;
-	border-radius: 9999px;
-	transition: width 0.3s ease;
-}
-
-.progress-inner.complete {
-	background: #16a34a;
-}
-
-/* Delete button styling */
-.delete-btn {
-	background: transparent;
-	border: none;
-	cursor: pointer;
-	font-size: 1.1rem;
-	line-height: 1;
-	color: #9ca3af;
-	transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.delete-btn:hover {
-	color: #ef4444;
-	transform: scale(1.1);
+.muted-text {
+	color: var(--el-text-color-secondary);
 }
 </style>

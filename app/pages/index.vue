@@ -1,49 +1,187 @@
 <template>
-	<div style="padding: 1rem 0">
-		<h2 class="title-lg" style="margin-bottom: 0.75rem">Topics Overview</h2>
-
-		<CreateTopic v-model:showAddModal="showAddModal" />
-
-		<!-- Loading state -->
-		<div v-if="loading" class="muted" aria-live="polite">
-			Loading topics…
-		</div>
-
-		<!-- Error state -->
-		<div v-if="error" class="note" style="background: #fff3f3; border-color: #f8d7da; color: #7f1d1d">
-			<strong>Error:</strong> {{ error }}
-			<div style="margin-top: 0.5rem">
-				<button class="btn" @click="reload">Retry</button>
+	<div class="dashboard-page">
+		<div class="page-header">
+			<div class="header-content">
+				<el-text
+					class="header-title"
+					size="xxl"
+					tag="h1"
+					type="primary"
+				>
+					Learning Dashboard
+				</el-text>
+				<el-text type="info" size="small" class="header-subtitle">
+					Manage your learning topics and track progress
+				</el-text>
 			</div>
 		</div>
 
-		<!-- Topics grid -->
-		<div v-if="!loading && !error" class="grid-topics" style="margin-top: 0.75rem">
-			<!-- Topic cards -->
-			<NuxtLink v-for="topic in topics" :key="topic.id" :to="`/topics/${topic.id}`" class="link"
-				style="text-decoration: none; display: block">
-				<TopicCard :topic="topic" :completed="getProgress(topic.id)[0]" :total="getProgress(topic.id)[1]"
-					:project-count="topic.projects.length" />
-			</NuxtLink>
+		<div class="dashboard-content">
+			<!-- Stats Overview -->
+			<el-row :gutter="16" class="stats-row">
+				<el-col :xs="24" :sm="8">
+					<el-card shadow="never" class="stat-card">
+						<div class="stat-content">
+							<el-text
+								class="stat-number"
+								type="primary"
+								size="xxl"
+							>
+								{{ topics.length }}
+							</el-text>
+							<el-text
+								class="stat-label"
+								type="info"
+								size="small"
+							>
+								Total Topics
+							</el-text>
+						</div>
+					</el-card>
+				</el-col>
+				<el-col :xs="24" :sm="8">
+					<el-card shadow="never" class="stat-card">
+						<div class="stat-content">
+							<el-text
+								class="stat-number"
+								type="success"
+								size="xxl"
+							>
+								{{ totalProjects }}
+							</el-text>
+							<el-text
+								class="stat-label"
+								type="info"
+								size="small"
+							>
+								Total Projects
+							</el-text>
+						</div>
+					</el-card>
+				</el-col>
+				<el-col :xs="24" :sm="8">
+					<el-card shadow="never" class="stat-card">
+						<div class="stat-content">
+							<el-text
+								class="stat-number"
+								type="warning"
+								size="xxl"
+							>
+								{{ completionRate }}%
+							</el-text>
+							<el-text
+								class="stat-label"
+								type="info"
+								size="small"
+							>
+								Completion Rate
+							</el-text>
+						</div>
+					</el-card>
+				</el-col>
+			</el-row>
 
-			<!-- Empty state -->
-			<div v-if="topics.length === 0" class="muted" style="padding: 1rem">
-				No topics found. You can reload the initial data.
-				<div style="margin-top: 0.5rem">
-					<button class="btn" @click="reload">
-						Reload initial data
-					</button>
+			<!-- Action Bar -->
+			<el-card class="action-section" shadow="never">
+				<template #header>
+					<div class="card-header">
+						<el-text size="large" tag="h2" type="primary">
+							Your Topics
+						</el-text>
+						<CreateTopic
+							v-model:showAddModal="showAddModal"
+							@created="handleTopicCreated"
+						/>
+					</div>
+				</template>
+
+				<!-- Loading state -->
+				<el-skeleton v-if="loading" :rows="6" animated />
+
+				<!-- Error state -->
+				<el-alert
+					v-else-if="error"
+					:title="error"
+					type="error"
+					:closable="false"
+					show-icon
+					class="error-alert"
+				>
+					<template #action>
+						<el-button type="danger" text @click="reload"
+							>Retry</el-button
+						>
+					</template>
+				</el-alert>
+
+				<!-- Topics grid -->
+				<div v-if="!loading && !error">
+					<!-- Empty state -->
+					<el-empty
+						v-if="topics.length === 0"
+						description="No topics found"
+						:image-size="200"
+						class="empty-state"
+					>
+						<template #description>
+							<div class="empty-description">
+								<el-text type="info" size="default">
+									No learning topics found yet.
+								</el-text>
+								<el-text
+									type="info"
+									size="small"
+									style="margin-top: 0.5rem; display: block"
+								>
+									Create your first topic to organize your
+									learning projects.
+								</el-text>
+							</div>
+						</template>
+						<template #extra>
+							<el-button-group style="margin-top: 1rem">
+								<el-button
+									type="primary"
+									@click="showAddModal = true"
+								>
+									Create First Topic
+								</el-button>
+								<el-button @click="reload">
+									Reload Data
+								</el-button>
+							</el-button-group>
+						</template>
+					</el-empty>
+
+					<!-- Topics grid -->
+					<div v-else class="topics-grid">
+						<NuxtLink
+							v-for="topic in topics"
+							:key="topic.id"
+							:to="`/topics/${topic.id}`"
+							class="topic-link"
+						>
+							<TopicCard
+								:topic="topic"
+								:completed="getProgress(topic.id)[0]"
+								:total="getProgress(topic.id)[1]"
+								:project-count="topic.projects.length"
+							/>
+						</NuxtLink>
+					</div>
 				</div>
-			</div>
+			</el-card>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { Plus, Refresh } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 import { useDashboardStore } from '~/stores/dashboard';
 import TopicCard from '~/components/TopicCard.vue';
-import CreateTopic from '~/components/CreateTopic.vue';
+import CreateTopic from '~/components/topic/CreateTopic.vue';
 
 const store = useDashboardStore();
 const loading = ref(true);
@@ -51,6 +189,34 @@ const error = ref<string | null>(null);
 const showAddModal = ref(false);
 
 onMounted(async () => {
+	await loadData();
+});
+
+const topics = computed(() => store.topics);
+
+const totalProjects = computed(() => {
+	return topics.value.reduce(
+		(total, topic) => total + topic.projects.length,
+		0
+	);
+});
+
+const completionRate = computed(() => {
+	if (totalProjects.value === 0) return 0;
+
+	const completedProjects = topics.value.reduce((total, topic) => {
+		const [completed] = getProgress(topic.id);
+		return total + completed;
+	}, 0);
+
+	return Math.round((completedProjects / totalProjects.value) * 100);
+});
+
+function getProgress(topicId: string): [number, number] {
+	return store.getTopicProgress(topicId);
+}
+
+async function loadData() {
 	loading.value = true;
 	error.value = null;
 	try {
@@ -58,15 +224,10 @@ onMounted(async () => {
 	} catch (err: any) {
 		console.error('Failed to load initial data:', err);
 		error.value = err?.message ?? String(err);
+		ElMessage.error('Failed to load topics');
 	} finally {
 		loading.value = false;
 	}
-});
-
-const topics = computed(() => store.topics);
-
-function getProgress(topicId: string): [number, number] {
-	return store.getTopicProgress(topicId);
 }
 
 async function reload() {
@@ -76,57 +237,190 @@ async function reload() {
 		store.topics = [];
 		store.projectIndex = {};
 		await store.loadInitialData();
+		ElMessage.success('Data reloaded successfully');
 	} catch (err: any) {
 		console.error('Reload failed:', err);
 		error.value = err?.message ?? String(err);
+		ElMessage.error('Failed to reload data');
 	} finally {
 		loading.value = false;
 	}
 }
+
+function handleTopicCreated() {
+	ElMessage.success('Topic created successfully');
+}
 </script>
 
 <style scoped>
-.grid-topics {
+.dashboard-page {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 1rem;
+}
+
+.page-header {
+	margin-bottom: 2rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.header-content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.header-title {
+	font-size: 2rem;
+	font-weight: 700;
+	line-height: 1.2;
+	margin: 0;
+}
+
+.header-subtitle {
+	font-weight: 400;
+	color: var(--el-text-color-regular);
+}
+
+.dashboard-content {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.stats-row {
+	margin-bottom: 0.5rem;
+}
+
+.stat-card {
+	border: 1px solid var(--el-border-color-light);
+	border-radius: 12px;
+	text-align: center;
+	transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+	border-color: var(--el-color-primary-light-5);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-content {
+	padding: 1.5rem 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.stat-number {
+	font-size: 2.5rem;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.stat-label {
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.action-section {
+	border: 1px solid var(--el-border-color-light);
+	border-radius: 12px;
+}
+
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.75rem 0;
+}
+
+.error-alert {
+	margin-bottom: 1rem;
+}
+
+.empty-state {
+	padding: 3rem 0;
+}
+
+.empty-description {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.topics-grid {
 	display: grid;
-	gap: 1.25rem;
-	grid-template-columns: repeat(1, minmax(0, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+	gap: 1.5rem;
+	margin-top: 0.5rem;
 }
 
-@media (min-width: 768px) {
-	.grid-topics {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+.topic-link {
+	text-decoration: none;
+	display: block;
+	transition: transform 0.2s ease;
+}
+
+.topic-link:hover {
+	transform: translateY(-2px);
+}
+
+:deep(.el-card__header) {
+	border-bottom: 1px solid var(--el-border-color-lighter);
+	padding: 1.25rem 1.5rem;
+}
+
+:deep(.el-card__body) {
+	padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+	.dashboard-page {
+		padding: 0.75rem;
+	}
+
+	.stats-row {
+		gap: 1rem;
+	}
+
+	.stat-content {
+		padding: 1rem 0.5rem;
+	}
+
+	.stat-number {
+		font-size: 2rem;
+	}
+
+	.card-header {
+		flex-direction: column;
+		gap: 1rem;
+		align-items: flex-start;
+	}
+
+	.topics-grid {
+		grid-template-columns: 1fr;
+		gap: 1rem;
+	}
+
+	:deep(.el-card__header) {
+		padding: 1rem;
+	}
+
+	:deep(.el-card__body) {
+		padding: 1rem;
 	}
 }
 
-@media (min-width: 1024px) {
-	.grid-topics {
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+@media (max-width: 480px) {
+	.header-title {
+		font-size: 1.25rem;
 	}
-}
 
-.muted {
-	color: #6b7280;
-	font-size: 0.95rem;
-}
-
-.note {
-	padding: 0.75rem;
-	background: #fff;
-	border: 1px solid #fde2e2;
-	border-radius: 8px;
-}
-
-.btn {
-	background: #2563eb;
-	color: white;
-	border: none;
-	padding: 0.5rem 0.75rem;
-	border-radius: 6px;
-	cursor: pointer;
-	font-weight: 600;
-}
-
-.link {
-	color: inherit;
+	.stat-number {
+		font-size: 1.75rem;
+	}
 }
 </style>

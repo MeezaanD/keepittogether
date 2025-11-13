@@ -1,18 +1,20 @@
 <template>
-	<div class="card" role="article">
-		<div class="row-between mb-1">
-			<h3 class="title-lg">{{ project.title }}</h3>
-			<span :class="badgeClass">{{ project.status }}</span>
-		</div>
+	<el-card class="project-card" shadow="hover" role="article">
+		<template #header>
+			<div class="card-header">
+				<el-text size="large" tag="h3" class="project-title">
+					{{ project.title }}
+				</el-text>
+				<el-tag :type="statusTagType" effect="light" size="large">
+					{{ statusDisplayText }}
+				</el-tag>
+			</div>
+		</template>
 
-		<div class="mt-2 small">{{ project.description }}</div>
-
-		<div class="mt-3 meta">
-			Started: {{ formatDate(project.startDate) }}
-			<span v-if="project.endDate">
-				| Ended: {{ formatDate(project.endDate) }}</span>
-		</div>
-	</div>
+		<el-text type="info" size="small" class="project-description">
+			{{ project.description }}
+		</el-text>
+	</el-card>
 </template>
 
 <script lang="ts" setup>
@@ -23,15 +25,78 @@ import { useFormattedDate } from '~/composables/useFormattedDate';
 const props = defineProps<{ project: Project }>();
 const formatDate = useFormattedDate();
 
-const badgeClass = computed(() => {
-	const base = 'badge';
+const statusTagType = computed(() => {
 	switch (props.project.status) {
 		case 'completed':
-			return `${base} badge--success`;
+			return 'success';
 		case 'in-progress':
-			return `${base} badge--warn`;
+			return 'warning';
+		case 'not-started':
+			return 'info';
 		default:
-			return `${base} badge--muted`;
+			return 'info';
+	}
+});
+
+const statusDisplayText = computed(() => {
+	switch (props.project.status) {
+		case 'completed':
+			return 'Completed';
+		case 'in-progress':
+			return 'In Progress';
+		case 'not-started':
+			return 'Not Started';
+		default:
+			return props.project.status;
 	}
 });
 </script>
+
+<style scoped>
+.project-card {
+	transition: all 0.3s ease;
+	height: 100%;
+	border-radius: 8px;
+}
+
+.project-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.5rem;
+}
+
+.project-title {
+	margin: 0;
+	font-weight: 600;
+	flex: 1;
+	word-break: break-word;
+}
+
+.project-description {
+	display: block;
+	line-height: 1.4;
+	margin-bottom: 1rem;
+}
+
+.custom-divider {
+	margin: 1rem 0;
+}
+
+.project-meta {
+	width: 100%;
+}
+
+:deep(.el-card__header) {
+	padding: 1.25rem 1.25rem 0.5rem;
+}
+
+:deep(.el-card__body) {
+	padding: 0.5rem 1.25rem 1.25rem;
+}
+</style>

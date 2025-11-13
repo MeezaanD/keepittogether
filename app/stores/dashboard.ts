@@ -390,7 +390,7 @@ export const useDashboardStore = defineStore('dashboard', {
 						endDate: newProject.endDate,
 					});
 				}
-				
+
 				// Update local state
 				const topic = this.topics.find((t) => t.id === topicId);
 				if (topic) {
@@ -411,42 +411,85 @@ export const useDashboardStore = defineStore('dashboard', {
 		},
 
 		/**
-		 * Adds a note to a project
+		 * Updates a project's details (title, description, etc.)
 		 * 
-		 * @param projectId - ID of the project to add the note to
-		 * @param note - The note data to add
-		 * @throws {Error} When project is not found
+		 * @param projectId - ID of the project to update
+		 * @param updatedData - Partial project data to update
+		 * @throws {Error} When project is not found or update fails
 		 * @returns {Promise<void>}
 		 * 
 		 * @example
-		 * await store.addNote('project-123', { date: '2024-01-01', content: 'Note content' });
+		 * await store.updateProject('project-123', { title: 'New Title', description: 'New description' });
 		 */
-		async addNote(projectId: string, note: Note): Promise<void> {
+		async updateProject(projectId: string, updatedData: Partial<Project>): Promise<void> {
 			const nuxtApp = useNuxtApp();
 			const db = (nuxtApp as any).$db;
+
 			try {
 				const lookup = this.projectIndex[projectId];
 				if (!lookup) throw new Error('Project not found in index');
+
 				const { topicId } = lookup;
-				
-				// Persist to Firestore if available
+
+				// Update in Firestore if available
 				if (db) {
-					const notesCol = collection(
+					const pDocRef = doc(
 						db,
 						'topics',
 						topicId,
 						'projects',
-						projectId,
-						'notes'
+						projectId
 					);
-					await addDoc(notesCol, note);
+					await updateDoc(pDocRef, updatedData);
 				}
-				
+
 				// Update local state
-				lookup.project.notes.push(note);
+				Object.assign(lookup.project, updatedData);
+				this.reindexProjects();
+
+			} catch (err) {
+				console.error('updateProject error', err);
+				throw err;
+			}
+		},
+
+		/**
+		 * Removes a project from a topic
+		 * 
+		 * @param topicId - ID of the topic containing the project
+		 * @param projectId - ID of the project to remove
+		 * @throws {Error} When operation fails
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.removeProject('programming', 'old-project-123');
+		 */
+		async removeProject(topicId: string, projectId: string): Promise<void> {
+			const nuxtApp = useNuxtApp();
+			const db = (nuxtApp as any).$db;
+			try {
+				// Remove from Firestore if connected
+				if (db) {
+					const pDocRef = doc(
+						db,
+						'topics',
+						topicId,
+						'projects',
+						projectId
+					);
+					await deleteDoc(pDocRef);
+				}
+
+				// Remove from local state
+				const topic = this.topics.find((t) => t.id === topicId);
+				if (topic) {
+					topic.projects = topic.projects.filter(
+						(p) => p.id !== projectId
+					);
+				}
 				this.reindexProjects();
 			} catch (err) {
-				console.error('addNote error', err);
+				console.error('removeProject error', err);
 				throw err;
 			}
 		},
@@ -483,7 +526,7 @@ export const useDashboardStore = defineStore('dashboard', {
 					);
 					await updateDoc(pDocRef, { status });
 				}
-				
+
 				// Update local state
 				lookup.project.status = status;
 				this.reindexProjects();
@@ -494,42 +537,165 @@ export const useDashboardStore = defineStore('dashboard', {
 		},
 
 		/**
-		 * Removes a project from a topic
+		 * Adds a note to a project
 		 * 
-		 * @param topicId - ID of the topic containing the project
-		 * @param projectId - ID of the project to remove
-		 * @throws {Error} When operation fails
+		 * @param projectId - ID of the project to add the note to
+		 * @param note - The note data to add
+		 * @throws {Error} When project is not found
 		 * @returns {Promise<void>}
 		 * 
 		 * @example
-		 * await store.removeProject('programming', 'old-project-123');
+		 * await store.addNote('project-123', { date: '2024-01-01', content: 'Note content' });
 		 */
-		async removeProject(topicId: string, projectId: string): Promise<void> {
+		async addNote(projectId: string, note: Note): Promise<void> {
 			const nuxtApp = useNuxtApp();
 			const db = (nuxtApp as any).$db;
 			try {
-				// Remove from Firestore if connected
+				const lookup = this.projectIndex[projectId];
+				if (!lookup) throw new Error('Project not found in index');
+				const { topicId } = lookup;
+
+				// Persist to Firestore if available
 				if (db) {
-					const pDocRef = doc(
+					const notesCol = collection(
 						db,
 						'topics',
 						topicId,
 						'projects',
-						projectId
+						projectId,
+						'notes'
 					);
-					await deleteDoc(pDocRef);
+					await addDoc(notesCol, note);
 				}
-				
-				// Remove from local state
-				const topic = this.topics.find((t) => t.id === topicId);
-				if (topic) {
-					topic.projects = topic.projects.filter(
-						(p) => p.id !== projectId
-					);
-				}
+
+				// Update local state
+				lookup.project.notes.push(note);
 				this.reindexProjects();
 			} catch (err) {
-				console.error('removeProject error', err);
+				console.error('addNote error', err);
+				throw err;
+			}
+		},
+
+		/**
+		 * Updates an existing note in a project
+		 * 
+		 * @param projectId - ID of the project containing the note
+		 * @param noteIndex - Index of the note to update in the project's notes array
+		 * @param updatedNote - The updated note data
+		 * @throws {Error} When project is not found or update fails
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.updateNote('project-123', 0, { date: '2024-01-01', content: 'Updated content' });
+		 */
+		async updateNote(projectId: string, noteIndex: number, updatedNote: Note): Promise<void> {
+			const nuxtApp = useNuxtApp();
+			const db = (nuxtApp as any).$db;
+
+			try {
+				const lookup = this.projectIndex[projectId];
+				if (!lookup) throw new Error('Project not found in index');
+
+				const { topicId } = lookup;
+				const existingNote = lookup.project.notes[noteIndex];
+
+				if (!existingNote) throw new Error('Note not found at specified index');
+
+				// Update in Firestore if available
+				if (db) {
+					// Since notes are stored as subcollection documents, we need to get the document ID
+					const notesCol = collection(
+						db,
+						'topics',
+						topicId,
+						'projects',
+						projectId,
+						'notes'
+					);
+					const notesSnap = await getDocs(notesCol);
+					const noteDocs = notesSnap.docs;
+
+					// Find the note document that matches our existing note content and date
+					const noteDoc = noteDocs.find(doc => {
+						const data = doc.data();
+						return data.date === existingNote.date && data.content === existingNote.content;
+					});
+
+					if (noteDoc) {
+						await updateDoc(noteDoc.ref, updatedNote);
+					} else {
+						console.warn('Note not found in Firestore, updating local state only');
+					}
+				}
+
+				// Update local state
+				lookup.project.notes[noteIndex] = { ...updatedNote };
+				this.reindexProjects();
+
+			} catch (err) {
+				console.error('updateNote error', err);
+				throw err;
+			}
+		},
+
+		/**
+		 * Deletes a note from a project
+		 * 
+		 * @param projectId - ID of the project containing the note
+		 * @param noteIndex - Index of the note to delete in the project's notes array
+		 * @throws {Error} When project is not found or deletion fails
+		 * @returns {Promise<void>}
+		 * 
+		 * @example
+		 * await store.deleteNote('project-123', 0);
+		 */
+		async deleteNote(projectId: string, noteIndex: number): Promise<void> {
+			const nuxtApp = useNuxtApp();
+			const db = (nuxtApp as any).$db;
+
+			try {
+				const lookup = this.projectIndex[projectId];
+				if (!lookup) throw new Error('Project not found in index');
+
+				const { topicId } = lookup;
+				const note = lookup.project.notes[noteIndex];
+
+				if (!note) throw new Error('Note not found at specified index');
+
+				// Delete from Firestore if available
+				if (db) {
+					// Since notes are stored as subcollection documents, we need to get the document ID
+					const notesCol = collection(
+						db,
+						'topics',
+						topicId,
+						'projects',
+						projectId,
+						'notes'
+					);
+					const notesSnap = await getDocs(notesCol);
+					const noteDocs = notesSnap.docs;
+
+					// Find the note document that matches our note content and date
+					const noteDoc = noteDocs.find(doc => {
+						const data = doc.data();
+						return data.date === note.date && data.content === note.content;
+					});
+
+					if (noteDoc) {
+						await deleteDoc(noteDoc.ref);
+					} else {
+						console.warn('Note not found in Firestore, deleting from local state only');
+					}
+				}
+
+				// Remove from local state
+				lookup.project.notes.splice(noteIndex, 1);
+				this.reindexProjects();
+
+			} catch (err) {
+				console.error('deleteNote error', err);
 				throw err;
 			}
 		},
@@ -582,14 +748,14 @@ export const useDashboardStore = defineStore('dashboard', {
 		 */
 		getTopicProgress:
 			(state) =>
-			(topicId: string): [number, number] => {
-				const t = state.topics.find((topic) => topic.id === topicId);
-				if (!t) return [0, 0];
-				const total = t.projects.length;
-				const completed = t.projects.filter(
-					(p) => p.status === 'completed'
-				).length;
-				return [completed, total];
-			},
+				(topicId: string): [number, number] => {
+					const t = state.topics.find((topic) => topic.id === topicId);
+					if (!t) return [0, 0];
+					const total = t.projects.length;
+					const completed = t.projects.filter(
+						(p) => p.status === 'completed'
+					).length;
+					return [completed, total];
+				},
 	},
 });
