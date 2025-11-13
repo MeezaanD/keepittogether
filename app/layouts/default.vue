@@ -118,7 +118,8 @@
 							@click="toggleSidebar"
 							class="mobile-menu-btn"
 						/>
-						<div class="header-title">Learning Dashboard</div>
+						<!-- <div class="header-title">Learning Dashboard</div> -->
+						<img src="../assets/images/stitch.png" alt="Logo" height="50" />
 						<div v-if="loading" class="header-loading">
 							<el-icon class="loading-spinner"
 								><Loading
@@ -154,6 +155,7 @@ import {
 	Refresh,
 	FolderOpened,
 } from '@element-plus/icons-vue';
+// import image from '../assets/images/stitch.png'
 
 const store = useDashboardStore();
 const router = useRouter();
