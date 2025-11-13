@@ -1,6 +1,9 @@
 <template>
 	<div>
-		<el-button plain @click="showModal = true"> Add Topic </el-button>
+		<el-button type="primary" @click="showModal = true">
+			<i class="el-icon-plus"></i>
+			Add Topic
+		</el-button>
 
 		<el-dialog v-model="showModal" title="Create New Topic" width="500" :before-close="handleClose">
 			<el-input v-model="newTopicName" placeholder="Enter topic name" @keyup.enter="handleCreate" />

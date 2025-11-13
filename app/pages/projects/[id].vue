@@ -156,7 +156,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Edit, Delete } from '@element-plus/icons-vue';
 import { useDashboardStore } from '~/stores/dashboard';
-import NotesList from '~/components/NotesList.vue';
+import NotesList from '~/components/views/NotesList.vue';
 import CreateNote from '~/components/note/CreateNote.vue';
 import { useFormattedDate } from '~/composables/useFormattedDate';
 import type { ProjectStatus } from '~/types';

@@ -160,7 +160,7 @@ import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { Edit, Close } from '@element-plus/icons-vue';
 import { useDashboardStore } from '~/stores/dashboard';
-import ProjectCard from '~/components/ProjectCard.vue';
+import ProjectCard from '~/components/views/ProjectCard.vue';
 import CreateProject from '~/components/project/CreateProject.vue';
 
 const route = useRoute();

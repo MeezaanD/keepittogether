@@ -9,10 +9,14 @@
 							<div class="note-header">
 								<h4 class="note-title">Note</h4>
 								<div class="note-actions">
-									<el-button type="primary" text size="small" :icon="Edit" @click="editNote(idx)"
-										title="Edit note" class="edit-btn" />
-									<el-button type="danger" text size="small" :icon="Delete"
-										@click="confirmDeleteNote(idx)" title="Delete note" class="delete-btn" />
+									<el-button type="primary" text size="default" :icon="Edit" @click="editNote(idx)"
+										title="Edit note" class="edit-btn">
+										Edit
+									</el-button>
+									<el-button type="danger" text size="default" :icon="Delete"
+										@click="confirmDeleteNote(idx)" title="Delete note" class="delete-btn">
+										Delete
+									</el-button>
 								</div>
 							</div>
 						</template>

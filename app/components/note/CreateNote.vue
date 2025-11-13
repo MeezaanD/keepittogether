@@ -22,7 +22,7 @@
 				<span class="dialog-footer">
 					<el-button @click="showModal = false">Cancel</el-button>
 					<el-button type="primary" @click="handleCreate">
-						Add Note
+						Create
 					</el-button>
 				</span>
 			</template>

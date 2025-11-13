@@ -160,9 +160,30 @@ function navigate(path: string) {
 	background: #f5f7fa;
 }
 
+.el-container>.el-container {
+	margin-left: 240px;
+	/* default width of sidebar */
+	transition: margin-left 0.3s ease;
+}
+
+.sidebar.collapsed+.el-container {
+	margin-left: 64px;
+	/* match collapsed sidebar width */
+}
+
 .sidebar {
-	background: #1f2937;
+	position: fixed;
+	/* stick it to the left */
+	top: 0;
+	left: 0;
+	height: 100vh;
+	/* full viewport height */
+	overflow-y: auto;
+	/* scroll inside the sidebar if content overflows */
+	z-index: 100;
+	/* sit above main content */
 	transition: width 0.3s ease;
+	background: #1f2937;
 	box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 

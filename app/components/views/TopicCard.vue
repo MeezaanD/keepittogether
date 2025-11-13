@@ -3,7 +3,7 @@
 		<template #header>
 			<div class="card-header">
 				<h3 class="topic-title">{{ topic.name }}</h3>
-				<el-button type="danger" text @click.stop.prevent="confirmDelete" title="Delete topic">
+				<el-button type="danger" text @click.stop.prevent="confirmDelete" :icon="Delete" title="Delete topic">
 					Delete
 				</el-button>
 			</div>
@@ -26,6 +26,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { Delete } from '@element-plus/icons-vue';
 import { useDashboardStore } from '~/stores/dashboard';
 import type { Topic } from '~/types';
 

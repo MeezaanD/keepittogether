@@ -5,7 +5,7 @@
 				<el-text class="header-title" size="large" tag="h1" type="primary">
 					Learning Dashboard
 				</el-text>
-				<el-text type="info" size="small" class="header-subtitle">
+				<el-text type="info" size="default" class="header-subtitle">
 					Manage your learning topics and track progress
 				</el-text>
 			</div>
@@ -56,7 +56,7 @@
 			<el-card class="action-section" shadow="never">
 				<template #header>
 					<div class="card-header">
-						<el-text size="large" tag="h2" type="primary">
+						<el-text size="large" tag="h1" type="primary">
 							Your Topics
 						</el-text>
 						<CreateTopic v-model:showAddModal="showAddModal" @created="handleTopicCreated" />
@@ -120,7 +120,7 @@ import { ref, computed, onMounted } from 'vue';
 import { Plus, Refresh } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import { useDashboardStore } from '~/stores/dashboard';
-import TopicCard from '~/components/TopicCard.vue';
+import TopicCard from '~/components/views/TopicCard.vue';
 import CreateTopic from '~/components/topic/CreateTopic.vue';
 
 const store = useDashboardStore();

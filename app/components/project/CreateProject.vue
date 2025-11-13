@@ -26,7 +26,7 @@
 				<span class="dialog-footer">
 					<el-button @click="showModal = false">Cancel</el-button>
 					<el-button type="primary" @click="handleCreate">
-						Create Project
+						Create
 					</el-button>
 				</span>
 			</template>
