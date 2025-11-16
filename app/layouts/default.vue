@@ -47,7 +47,7 @@
 								<el-icon>
 									<Document />
 								</el-icon>
-								<span>{{ project.title }}</span>
+								<span class="project-name">{{ project.title }} test</span>
 							</el-menu-item>
 						</el-sub-menu>
 
@@ -76,12 +76,6 @@
 						<el-button link :icon="Menu" @click="toggleSidebar" class="mobile-menu-btn" />
 						<!-- <div class="header-title">Learning Dashboard</div> -->
 						<img src="../assets/images/stitch.png" alt="Logo" height="50" />
-						<!-- <div v-if="loading" class="header-loading">
-							<el-icon class="loading-spinner">
-								<Loading />
-							</el-icon>
-							<span>Loading your data...</span>
-						</div> -->
 					</div>
 				</el-header>
 
@@ -91,7 +85,28 @@
 					</div>
 				</el-main>
 
-				<el-footer class="footer"> Footer </el-footer>
+				<el-footer class="footer">
+					<div class="footer-content">
+						<p class="dev-name">Built by <span>Meezaan Davids</span></p>
+
+						<div class="social-links">
+							<a href="mailto:meezaandavids365@gmail.com" target="_blank" title="Email">
+								<Icon icon="mdi:email-outline" />
+							</a>
+							<a href="https://meezaand.github.io/" target="_blank" title="Portfolio">
+								<Icon icon="mdi:web" />
+							</a>
+							<a href="https://github.com/MeezaanD" target="_blank" title="GitHub">
+								<Icon icon="mdi:github" />
+							</a>
+							<a href="https://www.linkedin.com/in/meezaan-davids-4a7aa8265/" target="_blank"
+								title="LinkedIn">
+								<Icon icon="mdi:linkedin" />
+							</a>
+						</div>
+					</div>
+				</el-footer>
+
 			</el-container>
 		</el-container>
 	</div>
@@ -111,7 +126,7 @@ import {
 	Refresh,
 	FolderOpened,
 } from '@element-plus/icons-vue';
-// import image from '../assets/images/stitch.png'
+import { Icon } from '@iconify/vue'
 
 const store = useDashboardStore();
 const router = useRouter();
@@ -173,15 +188,11 @@ function navigate(path: string) {
 
 .sidebar {
 	position: fixed;
-	/* stick it to the left */
 	top: 0;
 	left: 0;
 	height: 100vh;
-	/* full viewport height */
 	overflow-y: auto;
-	/* scroll inside the sidebar if content overflows */
 	z-index: 100;
-	/* sit above main content */
 	transition: width 0.3s ease;
 	background: #1f2937;
 	box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
@@ -345,10 +356,48 @@ function navigate(path: string) {
 .footer {
 	background: #f9fafb;
 	border-top: 1px solid #e5e7eb;
-	color: #6b7280;
 	padding: 1rem;
 	text-align: center;
-	height: 60px;
+	color: #6b7280;
+}
+
+.footer-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.dev-name {
+	font-size: 0.9rem;
+	color: #4b5563;
+}
+
+.dev-name span {
+	font-weight: 600;
+	color: #111827;
+}
+
+.social-links {
+	display: flex;
+	gap: 1.3rem;
+	font-size: 1.4rem;
+}
+
+.social-links a {
+	color: #4b5563;
+	transition: all 0.2s ease;
+}
+
+.social-links a:hover {
+	color: #111827;
+	transform: translateY(-2px) scale(1.1);
+}
+
+/* Make icons consistent size */
+.social-links :deep(svg) {
+	width: 1.4rem;
+	height: 1.4rem;
 }
 
 /* Menu item styles */
@@ -356,6 +405,14 @@ function navigate(path: string) {
 :deep(.el-sub-menu__title) {
 	border-radius: 6px;
 	margin: 2px 0;
+}
+
+.project-name {
+	display: inline-block;
+	max-width: 20ch;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 :deep(.el-menu-item:hover),
